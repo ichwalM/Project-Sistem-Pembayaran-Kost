@@ -1,5 +1,6 @@
-create database kost_049;
-use kost_049;
+create database pemesanan_kost_049;
+use pemesanan_kost_049;
+
 create table pemilik_kost(
 id_admin int primary key,
 nama_admin varchar(20),
@@ -7,8 +8,7 @@ no_admin varchar(20),
 email_admin varchar(20)
 );
 create table kamar_kost(
-id_kost int primary key,
-nama_kamar varchar(4),
+nama_kamar varchar(4) primary key,
 kategori enum('vip','reguler'),
 harga_bln int,
 status_kamar enum('aktif','non aktif'),
@@ -19,7 +19,7 @@ create table costumers(
 id_costumer int primary key,
 nama_costumer varchar(20),
 umur int,
-jenis_kelamin enum('pria','waita'),
+jenis_kelamin enum('pria','wanita'),
 status_cus enum('telah menikah','belum menikah'),
 domisili varchar(100),
 no_hp varchar(20),
@@ -27,8 +27,8 @@ email varchar(20)
 );
 create table sewa(
 id_sewa int auto_increment primary key,
-id_kost int,
-foreign key(id_kost) references kamar_kost(id_kost),
+nama_kamar varchar(4),
+foreign key(nama_kamar) references kamar_kost(nama_kamar),
 id_costumer int,
 foreign key(id_costumer) references costumers(id_costumer),
 tgl_sewa date,
@@ -49,27 +49,26 @@ insert into pemilik_kost values
 ('10','irpang','082293947429','irpang@gmail.com');
 desc kamar_kost;
 INSERT INTO kamar_kost VALUES
-('1','A01','reguler','700000','aktif','1'),
-('2','A02','reguler','700000','aktif','1'),
-('3','A03','reguler','700000','aktif','2'),
-('4','A04','reguler','700000','aktif','2'),
-('5','A05','reguler','700000','aktif','1'),
-('6','B01','vip','1000000','aktif','1'),
-('7','B02','vip','1000000','aktif','2'),
-('8','B03','vip','1000000','aktif','2'),
-('9','B04','vip','1000000','aktif','1'),
-('10','B05','vip','1000000','aktif','2'),
-('11','A06','reguler','700000','non aktif','1'),
-('12','A07','reguler','700000','non aktif','1'),
-('13','A08','reguler','700000','non aktif','2'),
-('14','A09','reguler','700000','non aktif','2'),
-('15','A10','reguler','700000','non aktif','1'),
-('16','B06','vip','1000000','non aktif','1'),
-('17','B07','vip','1000000','non aktif','2'),
-('18','B08','vip','1000000','non aktif','2'),
-('19','B09','vip','1000000','non aktif','1'),
-('20','B10','vi
-p','1000000','non aktif','2');
+('A01','reguler','700000','aktif','1'),
+('A02','reguler','700000','aktif','1'),
+('A03','reguler','700000','aktif','2'),
+('A04','reguler','700000','aktif','2'),
+('A05','reguler','700000','aktif','1'),
+('B01','vip','1000000','aktif','1'),
+('B02','vip','1000000','aktif','2'),
+('B03','vip','1000000','aktif','2'),
+('B04','vip','1000000','aktif','1'),
+('B05','vip','1000000','aktif','2'),
+('A06','reguler','700000','non aktif','1'),
+('A07','reguler','700000','non aktif','1'),
+('A08','reguler','700000','non aktif','2'),
+('A09','reguler','700000','non aktif','2'),
+('A10','reguler','700000','non aktif','1'),
+('B06','vip','1000000','non aktif','1'),
+('B07','vip','1000000','non aktif','2'),
+('B08','vip','1000000','non aktif','2'),
+('B09','vip','1000000','non aktif','1'),
+('B10','vip','1000000','non aktif','2');
 
 desc costumers;
 insert into costumers values
@@ -84,17 +83,19 @@ insert into costumers values
 (9, 'Putra', 21, 'pria', 'belum menikah', 'wajo', '081122004477', 'i@gmail.com'),
 (10, 'Ikram', 20, 'pria', 'belum menikah', 'kolaka', '081122004488', 'j@gmail.com');
 
-INSERT INTO sewa (id_kost, id_costumer, tgl_sewa, tgl_berakhir, metode_pembayaran) VALUES
-(1, 1, '2024-01-01', '2024-01-31', 'tunai'),
-(2, 2, '2024-01-05', '2024-02-04', 'non tunai'),
-(3, 3, '2024-01-10', '2024-02-09', 'tunai'),
-(4, 4, '2024-01-15', '2024-02-14', 'non tunai'),
-(5, 5, '2024-01-20', '2024-02-19', 'tunai'),
-(6, 6, '2024-01-25', '2024-02-24', 'non tunai'),
-(7, 7, '2024-01-30', '2024-02-29', 'tunai'),
-(8, 8, '2024-02-01', '2024-03-02', 'non tunai'),
-(9, 9, '2024-02-05', '2024-03-06', 'tunai'),
-(10, 10, '2024-02-10', '2024-03-11', 'non tunai');
+INSERT INTO sewa (nama_kamar, id_costumer, tgl_sewa, tgl_berakhir, metode_pembayaran) VALUES
+('A01', 1, '2024-01-01', '2024-01-31', 'tunai'),
+('A02', 2, '2024-01-05', '2024-02-04', 'non tunai'),
+('A03', 3, '2024-01-10', '2024-02-09', 'tunai'),
+('A04', 4, '2024-01-15', '2024-02-14', 'non tunai'),
+('A05', 5, '2024-01-20', '2024-02-19', 'tunai'),
+('B01', 6, '2024-01-25', '2024-02-24', 'non tunai'),
+('B02', 7, '2024-01-30', '2024-02-29', 'tunai'),
+('B03', 8, '2024-02-01', '2024-03-02', 'non tunai'),
+('B04', 9, '2024-02-05', '2024-03-06', 'tunai'),
+('B05', 10, '2024-02-10', '2024-03-11', 'non tunai');
+drop table sewa;
+desc sewa;
 /*
 DELIMITER $$
 CREATE PROCEDURE insert_sewa(
@@ -152,6 +153,18 @@ BEGIN
 END //
 DELIMITER ;
 */
+
+create view infoKostKosong as
+select nama_kamar, kategori,harga_bln, status_kamar 
+from kamar_kost where status_kamar='non aktif';
+select *from infoKostKosong;
+
+select costumers.nama_costumer,costumers.no_hp,
+sewa.tgl_sewa,sewa.tgl_berakhir,kamar_kost.nama_kamar
+from sewa join kamar_kost on kamar_kost.nama_kamar=sewa.nama_kamar
+join costumers on costumers.id_costumer=sewa.id_costumer
+where nama_kamar='A02';
+
 CALL AddCostumer(
 -- 'Nama Costumer',
 --  umur,
