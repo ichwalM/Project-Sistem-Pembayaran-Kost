@@ -1,6 +1,6 @@
 create database pemesanan_kost_049;
 use pemesanan_kost_049;
-
+drop database pemesanan_kost_049;
 create table pemilik_kost(
 id_admin int primary key,
 nama_admin varchar(20),
@@ -16,7 +16,7 @@ id_admin int,
 foreign key(id_admin) references pemilik_kost(id_admin)
 );
 create table costumers(
-id_costumer int primary key,
+id_costumer int auto_increment primary key,
 nama_costumer varchar(20),
 umur int,
 jenis_kelamin enum('pria','wanita'),
@@ -94,31 +94,11 @@ INSERT INTO sewa (nama_kamar, id_costumer, tgl_sewa, tgl_berakhir, metode_pembay
 ('B03', 8, '2024-02-01', '2024-03-02', 'non tunai'),
 ('B04', 9, '2024-02-05', '2024-03-06', 'tunai'),
 ('B05', 10, '2024-02-10', '2024-03-11', 'non tunai');
-drop table sewa;
-desc sewa;
-/*
-DELIMITER $$
-CREATE PROCEDURE insert_sewa(
-    IN p_id_kost INT,
-    IN p_id_costumer INT,
-    IN p_tgl_sewa DATE,
-    IN p_metode_pembayaran ENUM('tunai', 'non tunai')
-)
-BEGIN
-    DECLARE v_tgl_berakhir DATE;
-    -- Hitung tanggal berakhir dengan menambahkan 29 hari ke tanggal sewa
-    SET v_tgl_berakhir = DATE_ADD(p_tgl_sewa, INTERVAL 29 DAY);
-    -- Insert data ke tabel sewa
-    INSERT INTO sewa (id_kost, id_costumer, tgl_sewa, tgl_berakhir, metode_pembayaran)
-    VALUES (p_id_kost, p_id_costumer, p_tgl_sewa, v_tgl_berakhir, p_metode_pembayaran);
-    -- Update status kamar menjadi 'aktif'
-    UPDATE kamar_kost
-    SET status_kamar = 'aktif'
-    WHERE id_kost = p_id_kost AND status_kamar = 'non aktif';
-END$$
-DELIMITER ;
+
+
+
 ----------------------------
-DELIMITER //
+desc costumers;
 CREATE PROCEDURE AddCostumer(
     IN p_nama_costumer VARCHAR(20),
     IN p_umur INT,
@@ -128,59 +108,69 @@ CREATE PROCEDURE AddCostumer(
     IN p_no_hp VARCHAR(20),
     IN p_email VARCHAR(20)
 )
-BEGIN
-    -- Tambahkan record baru ke tabel costumers
-    INSERT INTO costumers (
-        id_costumer,
-        nama_costumer,
-        umur,
-        jenis_kelamin,
-        status_cus,
-        domisili,
-        no_hp,
-        email
-    )
-    VALUES (
-        (SELECT IFNULL(MAX(id_costumer), 0) + 1 FROM costumers), -- Generate ID otomatis
-        p_nama_costumer,
-        p_umur,
-        p_jenis_kelamin,
-        p_status_cus,
-        p_domisili,
-        p_no_hp,
-        p_email
-    );
-END //
+insert into costumers(nama_costumer, umur, jenis_kelamin, status_cus, domisili, no_hp, email)
+values (p_nama_costumer, p_umur, p_jenis_kelamin, p_status_cus, p_domisili, p_no_hp, p_email);
+CALL AddCostumer(
+    'John Doe', 25, 'pria', 'belum menikah', 
+    'Makassar', '081122334455', 'john.doe@gmail.com'
+);
+/*
+DELIMITER $$
+CREATE PROCEDURE addSewa(
+    IN p_nama_kamar VARCHAR(4),
+    IN p_id_costumer INT,
+    IN p_tgl_sewa DATE,
+    IN p_metode_pembayaran ENUM('tunai', 'non tunai')
+)
+BEGIN 
+	DECLARE p_tgl_berakhir DATE;
+	SET p_tgl_berakhir = DATE_ADD(p_tgl_sewa,INTERVAL 30 DAY);
+	INSERT INTO sewa (nama_kamar, id_costumer, tgl_sewa, tgl_berakhir, metode_pembayaran)
+    values(p_nama_kamar, p_id_costumer, p_tgl_sewa, p_tgl_berakhir, p_metode_pembayaran);
+END$$
 DELIMITER ;
 */
-
-create view infoKostKosong as
-select nama_kamar, kategori,harga_bln, status_kamar 
-from kamar_kost where status_kamar='non aktif';
-select *from infoKostKosong;
-
-select costumers.nama_costumer,costumers.no_hp,
-sewa.tgl_sewa,sewa.tgl_berakhir,kamar_kost.nama_kamar
-from sewa join kamar_kost on kamar_kost.nama_kamar=sewa.nama_kamar
-join costumers on costumers.id_costumer=sewa.id_costumer
-where nama_kamar='A02';
-
-CALL AddCostumer(
--- 'Nama Costumer',
---  umur,
--- 'pria',
--- 'belum menikah',
--- 'Makassar',
--- 'nomor telepon',
--- 'email@example.com'
-);
-
-call insert_sewa(
--- id_kost,
--- id_costumer,
--- 'tgl_sewa',
--- pembayaran'tunai/non tunai'
-);
-
-
+/*
+DELIMITER $$
+create trigger updateStatusKamar
+after insert on sewa
+for each row
+BEGIN
+	update kamar_kost set status_kamar='non aktif'
+	where nama_kamar=NEW.nama_kamar;
+END$$
+DELIMITER ;
+*/
+show triggers;
+DESC sewa;
+CALL addSewa('B03', 11, '2024-11-25', 'tunai');
+/*
+DELIMITER //
+create function hitumTotalBiaya(
+f_nama_kamar varchar(4),
+f_total_bln int)
+returns int,
+returns varhcar
+begin 
+	declare f_harga_bln int;
+    declare f_total_biaya int;
+    select harga_bln into f_harga_bln
+    from kamar_kost
+    where nama_kamar=f_nama_kamar;
+    set f_total_biaya = f_harga_bln * f_total_bln;
+    return f_total_biaya;
+end //
+DELIMITER ;
+*/
+select sum(harga_bln)as setoranBln from kamar_kost;
+select nama_costumer from costumers order by nama_costumer desc;
+SELECT 
+    kategori, 
+    SUM(harga_bln) AS total_penghasilan
+FROM 
+    kamar_kost
+WHERE 
+    nama_kamar IN (SELECT nama_kamar FROM sewa)
+GROUP BY 
+    kategori;
 
